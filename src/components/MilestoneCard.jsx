@@ -1,12 +1,14 @@
 import React, { useState, useRef } from 'react'
-import { AVATARS, STATUS_LABEL, PRIORITY_LABEL, STATUS_CLASS, PRIORITY_CLASS, fmtDate, isOverdue, exportIcal } from '../lib/constants'
+import { STATUS_LABEL, PRIORITY_LABEL, STATUS_CLASS, PRIORITY_CLASS, fmtDate, isOverdue, exportIcal } from '../lib/constants'
 
-export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask }) {
-  const av = AVATARS[item.avatar % 4]
+export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask, onEditItem }) {
   const overdue = isOverdue(item.due) && item.status !== 'done'
 
   return (
-    <div className={`milestone-card ${item.priority === 'critical' ? 'critical-card' : ''}`}>
+    <div
+      className={`milestone-card ${item.priority === 'critical' ? 'critical-card' : ''}`}
+      onClick={() => onEditItem(item)}
+    >
       <div className="mc-top">
         <div className="mc-title">{item.title}</div>
         <div className="mc-badges">
@@ -24,29 +26,16 @@ export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleS
 
       {item.notes && <div className="mc-desc">{item.notes}</div>}
 
-      <div className="mc-meta">
-        <div className="mc-meta-item">
-          <div className="avatar" style={{ background: av.bg, color: av.c }}>{av.i}</div>
-          {av.i}
-        </div>
-        {item.due && (
+      {item.due && (
+        <div className="mc-meta">
           <div className="mc-meta-item">
             <CalIcon />
             <span style={{ color: overdue ? '#7A1A3A' : undefined, fontWeight: overdue ? 500 : undefined }}>
               {overdue ? 'Overdue · ' : ''}{fmtDate(item.due)}
             </span>
           </div>
-        )}
-        {item.due && (
-          <button
-            className="mc-ical-btn"
-            onClick={e => { e.stopPropagation(); exportIcal(item.title, item.due, '', '', '', item.notes || '') }}
-            title="Add to Calendar"
-          >
-            <CalIcon size={10} /> .ics
-          </button>
-        )}
-      </div>
+        </div>
+      )}
 
       {subtasks.length > 0 && (
         <div className="mc-subtasks">
@@ -74,98 +63,157 @@ export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleS
 
 function SubtaskRow({ subtask: s, parentDue, onToggle, onCycle, onUpdate, onDelete }) {
   const [editingTitle, setEditingTitle] = useState(false)
-  const [editingDate, setEditingDate] = useState(false)
   const [titleVal, setTitleVal] = useState(s.title)
-  const titleRef = useRef(null)
+  const [icalModal, setIcalModal] = useState(false)
+
+  // Keep titleVal in sync if subtask updates externally
+  React.useEffect(() => { setTitleVal(s.title) }, [s.title])
 
   function saveTitle() {
     const trimmed = titleVal.trim()
-    if (trimmed && trimmed !== s.title) {
-      onUpdate(s, { title: trimmed })
-    } else {
-      setTitleVal(s.title)
-    }
+    if (trimmed && trimmed !== s.title) onUpdate(s, { title: trimmed })
+    else setTitleVal(s.title)
     setEditingTitle(false)
   }
 
   function saveDate(val) {
     onUpdate(s, { due: val || null })
-    setEditingDate(false)
   }
 
   return (
-    <div className="st-row" onClick={e => e.stopPropagation()}>
-      <input
-        type="checkbox"
-        className="st-check"
-        checked={s.status === 'done'}
-        onChange={e => onToggle(s, e.target.checked)}
-        onClick={e => e.stopPropagation()}
-      />
-
-      {/* Inline title edit */}
-      {editingTitle ? (
+    <>
+      <div className="st-row" onClick={e => e.stopPropagation()}>
         <input
-          ref={titleRef}
-          autoFocus
-          value={titleVal}
-          onChange={e => setTitleVal(e.target.value)}
-          onBlur={saveTitle}
-          onKeyDown={e => { if (e.key === 'Enter') saveTitle(); if (e.key === 'Escape') { setTitleVal(s.title); setEditingTitle(false) } }}
+          type="checkbox"
+          className="st-check"
+          checked={s.status === 'done'}
+          onChange={e => onToggle(s, e.target.checked)}
           onClick={e => e.stopPropagation()}
-          style={{ flex: 1, fontSize: 12, border: '1px solid var(--accent)', borderRadius: 6, padding: '2px 6px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none' }}
         />
-      ) : (
-        <span
-          className={`st-title ${s.status === 'done' ? 'done' : ''}`}
-          onClick={e => { e.stopPropagation(); setEditingTitle(true) }}
-          title="Click to edit"
-          style={{ cursor: 'text' }}
+
+        {/* Inline title */}
+        {editingTitle ? (
+          <input
+            autoFocus
+            value={titleVal}
+            onChange={e => setTitleVal(e.target.value)}
+            onBlur={saveTitle}
+            onKeyDown={e => {
+              if (e.key === 'Enter') saveTitle()
+              if (e.key === 'Escape') { setTitleVal(s.title); setEditingTitle(false) }
+            }}
+            onClick={e => e.stopPropagation()}
+            style={{ flex: 1, fontSize: 12, border: '1px solid var(--accent)', borderRadius: 6, padding: '2px 6px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none' }}
+          />
+        ) : (
+          <span
+            className={`st-title ${s.status === 'done' ? 'done' : ''}`}
+            onClick={e => { e.stopPropagation(); setEditingTitle(true) }}
+            title="Click to edit"
+            style={{ cursor: 'text', flex: 1 }}
+          >
+            {s.title}
+          </span>
+        )}
+
+        <button
+          className={`status-badge ${STATUS_CLASS[s.status]}`}
+          style={{ fontSize: 9, padding: '1px 7px', flexShrink: 0 }}
+          onClick={e => { e.stopPropagation(); onCycle(s) }}
         >
-          {s.title}
-        </span>
-      )}
+          {STATUS_LABEL[s.status]}
+        </button>
 
-      <button
-        className={`status-badge ${STATUS_CLASS[s.status]}`}
-        style={{ fontSize: 9, padding: '1px 7px' }}
-        onClick={e => { e.stopPropagation(); onCycle(s) }}
-      >
-        {STATUS_LABEL[s.status]}
-      </button>
-
-      {/* Inline date edit */}
-      {editingDate ? (
+        {/* Inline date — native date input always visible */}
         <input
           type="date"
-          autoFocus
-          defaultValue={s.due || parentDue || ''}
-          onBlur={e => saveDate(e.target.value)}
-          onChange={e => saveDate(e.target.value)}
+          value={s.due || parentDue || ''}
+          onChange={e => { e.stopPropagation(); saveDate(e.target.value) }}
           onClick={e => e.stopPropagation()}
-          style={{ fontSize: 10, border: '1px solid var(--accent)', borderRadius: 6, padding: '1px 5px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none', width: 110 }}
+          title="Edit due date"
+          style={{
+            fontSize: 10, border: '1px solid var(--border-md)', borderRadius: 6,
+            padding: '2px 5px', background: 'var(--bg)', color: 'var(--text)',
+            fontFamily: 'DM Sans,sans-serif', outline: 'none', width: 115, cursor: 'pointer',
+            flexShrink: 0
+          }}
+          onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+          onBlur={e => e.target.style.borderColor = 'var(--border-md)'}
         />
-      ) : (
-        <span
-          className="st-date"
-          onClick={e => { e.stopPropagation(); setEditingDate(true) }}
-          title="Click to edit date"
-          style={{ cursor: 'pointer', textDecoration: 'underline dotted' }}
-        >
-          {fmtDate(s.due || parentDue)}
-        </span>
-      )}
 
-      {/* Delete */}
-      <button
-        onClick={e => { e.stopPropagation(); if (window.confirm(`Delete "${s.title}"?`)) onDelete(s) }}
-        title="Delete sub-task"
-        style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '0 2px', borderRadius: 4, flexShrink: 0 }}
-        onMouseEnter={e => e.target.style.color = '#c0392b'}
-        onMouseLeave={e => e.target.style.color = 'var(--text-hint)'}
-      >
-        ×
-      </button>
+        {/* iCal button */}
+        <button
+          onClick={e => { e.stopPropagation(); setIcalModal(true) }}
+          title="Export to Calendar"
+          style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 13, lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
+          onMouseEnter={e => e.target.style.color = 'var(--accent)'}
+          onMouseLeave={e => e.target.style.color = 'var(--text-hint)'}
+        >
+          📅
+        </button>
+
+        {/* Delete */}
+        <button
+          onClick={e => { e.stopPropagation(); if (window.confirm(`Delete "${s.title}"?`)) onDelete(s) }}
+          title="Delete"
+          style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
+          onMouseEnter={e => e.target.style.color = '#c0392b'}
+          onMouseLeave={e => e.target.style.color = 'var(--text-hint)'}
+        >
+          ×
+        </button>
+      </div>
+
+      {icalModal && (
+        <IcalModal
+          subtask={s}
+          parentDue={parentDue}
+          onClose={() => setIcalModal(false)}
+        />
+      )}
+    </>
+  )
+}
+
+function IcalModal({ subtask, parentDue, onClose }) {
+  const [title, setTitle] = useState(subtask.title)
+  const [date, setDate] = useState(subtask.due || parentDue || '')
+  const [start, setStart] = useState('')
+  const [end, setEnd] = useState('')
+  const [location, setLocation] = useState('')
+  const [notes, setNotes] = useState('')
+
+  function handleExport() {
+    if (!date) return
+    exportIcal(title, date, start, end, location, notes)
+    onClose()
+  }
+
+  return (
+    <div
+      style={{ position: 'fixed', inset: 0, background: 'var(--overlay)', zIndex: 200, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}
+      onClick={e => { if (e.target === e.currentTarget) onClose() }}
+    >
+      <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-md)', padding: '1.5rem', width: 420, maxWidth: '95vw', boxShadow: 'var(--shadow-lg)', display: 'flex', flexDirection: 'column', gap: 14 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <div style={{ fontFamily: 'DM Serif Display, serif', fontSize: 20, color: 'var(--text)' }}>Export to Calendar</div>
+          <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 22, color: 'var(--text-muted)', cursor: 'pointer' }}>×</button>
+        </div>
+
+        <div className="field"><label>Event title</label><input value={title} onChange={e => setTitle(e.target.value)} /></div>
+        <div className="field"><label>Date *</label><input type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
+        <div className="field-row">
+          <div className="field"><label>Start time</label><input type="time" value={start} onChange={e => setStart(e.target.value)} /></div>
+          <div className="field"><label>End time</label><input type="time" value={end} onChange={e => setEnd(e.target.value)} /></div>
+        </div>
+        <div className="field"><label>Location</label><input value={location} onChange={e => setLocation(e.target.value)} placeholder="Optional" /></div>
+        <div className="field"><label>Notes</label><textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional" rows={2} /></div>
+
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
+          <button className="btn-secondary" onClick={onClose}>Cancel</button>
+          <button className="btn-primary" onClick={handleExport} disabled={!date}>Download .ics</button>
+        </div>
+      </div>
     </div>
   )
 }

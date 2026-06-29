@@ -7,6 +7,7 @@ import Dashboard from './components/Dashboard'
 import ProjectView from './components/ProjectView'
 import Settings from './components/Settings'
 import Modal from './components/Modal'
+import EditItemModal from './components/EditItemModal'
 
 export default function App() {
   const data = useData()
@@ -15,6 +16,7 @@ export default function App() {
   const [page, setPage] = useState('dashboard') // 'dashboard' | 'project' | 'settings'
   const [activeOrg, setActiveOrg] = useState(null)
   const [modalOpen, setModalOpen] = useState(false)
+  const [editItem, setEditItem] = useState(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false)
 
@@ -75,6 +77,20 @@ export default function App() {
     try { await data.deleteSubtask(subtask.id) }
     catch (e) { showToast('Error: ' + e.message) }
   }
+
+  // ── Edit / Delete item ──
+  function handleEditItem(item) { setEditItem(item) }
+
+  async function handleSaveItem(item, updates) {
+    try { await data.updateItem(item.id, updates); showToast('Item updated') }
+    catch (e) { showToast('Error: ' + e.message) }
+  }
+
+  async function handleDeleteItem(item) {
+    try { await data.deleteItem(item.id); showToast('Item deleted') }
+    catch (e) { showToast('Error: ' + e.message) }
+  }
+
   async function handleCreateItem(itemData, subtaskRows = []) {
     const item = await data.createItem(itemData)
     for (const row of subtaskRows) {
@@ -163,6 +179,7 @@ export default function App() {
               onCycleSubtask={handleCycleSubtask}
               onUpdateSubtask={handleUpdateSubtask}
               onDeleteSubtask={handleDeleteSubtask}
+              onEditItem={handleEditItem}
             />
           )}
           {page === 'project' && activeOrg && (
@@ -176,6 +193,7 @@ export default function App() {
               onCycleSubtask={handleCycleSubtask}
               onUpdateSubtask={handleUpdateSubtask}
               onDeleteSubtask={handleDeleteSubtask}
+              onEditItem={handleEditItem}
             />
           )}
           {page === 'settings' && (
@@ -207,6 +225,17 @@ export default function App() {
         onCreateEvent={data.createEvent}
         showToast={showToast}
       />
+
+      {/* Edit item modal */}
+      {editItem && (
+        <EditItemModal
+          item={editItem}
+          subprojects={data.subprojects}
+          onSave={handleSaveItem}
+          onDelete={handleDeleteItem}
+          onClose={() => setEditItem(null)}
+        />
+      )}
 
       {/* Toast */}
       {toast && <div className="toast">{toast}</div>}
