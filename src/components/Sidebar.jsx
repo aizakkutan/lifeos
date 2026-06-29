@@ -35,15 +35,24 @@ export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, o
   return (
     <>
       <div className={`sb-backdrop ${mobileOpen ? 'show' : ''}`} onClick={onMobileClose} />
-      <button className="hamburger" onClick={onMobileClose}>☰</button>
+      <button className="hamburger" onClick={() => mobileOpen ? onMobileClose() : document.getElementById('sidebar').classList.add('mobile-open')}>☰</button>
       <button className={`sb-expand-btn ${collapsed ? 'show' : ''}`} onClick={onExpand}>›</button>
 
       <nav className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`} id="sidebar">
-        <button className="sb-collapse-btn" onClick={() => { if (window.innerWidth <= 768) onMobileClose(); else onCollapse(); }}>‹</button>
 
-        <div className="sb-header">
-          <div className="sb-title">LifeOS</div>
-          <div className="sb-sub">Personal OS</div>
+        {/* Header row with title + collapse button inline */}
+        <div className="sb-header" style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', paddingRight: '1rem' }}>
+          <div>
+            <div className="sb-title">LifeOS</div>
+            <div className="sb-sub">Personal OS</div>
+          </div>
+          <button
+            onClick={() => { if (window.innerWidth <= 768) onMobileClose(); else onCollapse(); }}
+            style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-muted)', width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}
+            title="Close sidebar"
+          >
+            ‹
+          </button>
         </div>
 
         <div className="sb-scroll">

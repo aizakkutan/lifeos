@@ -55,13 +55,7 @@ body {
   .sidebar.mobile-open { transform: translateX(0); }
 }
 
-.sb-collapse-btn {
-  position: absolute; top: 14px; right: 10px;
-  background: none; border: 1px solid var(--border); border-radius: 8px;
-  color: var(--text-muted); width: 26px; height: 26px;
-  cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;
-}
-.sb-collapse-btn:hover { background: var(--surface2); }
+.sb-header { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border-sb); }
 
 .sb-expand-btn {
   position: fixed; top: 14px; left: 14px; z-index: 80;
@@ -83,8 +77,6 @@ body {
   box-shadow: var(--shadow);
 }
 @media (max-width: 768px) { .hamburger { display: flex; } }
-
-.sb-header { padding: 1.25rem 1.25rem 1rem; border-bottom: 1px solid var(--border-sb); padding-right: 44px; }
 .sb-title { font-family: 'DM Serif Display', serif; font-size: 18px; color: var(--accent); }
 .sb-sub { font-size: 10px; letter-spacing: .12em; text-transform: uppercase; color: var(--text-hint); margin-top: 2px; }
 
