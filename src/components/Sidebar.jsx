@@ -9,7 +9,13 @@ export default function Sidebar({ activePage, activeOrg, onNavDashboard, onNavOr
       <button className={`sb-expand-btn ${collapsed ? 'show' : ''}`} onClick={onExpand}>›</button>
 
       <nav className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`} id="sidebar">
-        <button className="sb-collapse-btn" onClick={onCollapse}>‹</button>
+        <button
+          className="sb-collapse-btn"
+          onClick={() => {
+            if (window.innerWidth <= 768) onMobileClose()
+            else onCollapse()
+          }}
+        >‹</button>
 
         <div className="sb-header">
           <div className="sb-title">LifeOS</div>

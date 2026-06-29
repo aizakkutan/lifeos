@@ -66,7 +66,15 @@ export default function App() {
     catch (e) { showToast('Error: ' + e.message) }
   }
 
-  // ── Create item (with optional subtasks) ──
+  async function handleUpdateSubtask(subtask, updates) {
+    try { await data.updateSubtask(subtask.id, updates) }
+    catch (e) { showToast('Error: ' + e.message) }
+  }
+
+  async function handleDeleteSubtask(subtask) {
+    try { await data.deleteSubtask(subtask.id) }
+    catch (e) { showToast('Error: ' + e.message) }
+  }
   async function handleCreateItem(itemData, subtaskRows = []) {
     const item = await data.createItem(itemData)
     for (const row of subtaskRows) {
@@ -153,6 +161,8 @@ export default function App() {
               onCycleStatus={handleCycleStatus}
               onToggleSubtask={handleToggleSubtask}
               onCycleSubtask={handleCycleSubtask}
+              onUpdateSubtask={handleUpdateSubtask}
+              onDeleteSubtask={handleDeleteSubtask}
             />
           )}
           {page === 'project' && activeOrg && (
@@ -164,6 +174,8 @@ export default function App() {
               onCycleStatus={handleCycleStatus}
               onToggleSubtask={handleToggleSubtask}
               onCycleSubtask={handleCycleSubtask}
+              onUpdateSubtask={handleUpdateSubtask}
+              onDeleteSubtask={handleDeleteSubtask}
             />
           )}
           {page === 'settings' && (
@@ -187,8 +199,11 @@ export default function App() {
         currentOrg={activeOrg}
         subprojects={data.subprojects}
         items={data.items}
+        subtasks={data.subtasks}
         onCreateItem={handleCreateItem}
         onCreateSubtask={data.createSubtask}
+        onUpdateSubtask={(s, updates) => data.updateSubtask(s.id, updates)}
+        onDeleteSubtask={(s) => data.deleteSubtask(s.id)}
         onCreateEvent={data.createEvent}
         showToast={showToast}
       />

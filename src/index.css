@@ -62,7 +62,6 @@ body {
   cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 14px;
 }
 .sb-collapse-btn:hover { background: var(--surface2); }
-@media (max-width: 768px) { .sb-collapse-btn { display: none; } }
 
 .sb-expand-btn {
   position: fixed; top: 14px; left: 14px; z-index: 80;

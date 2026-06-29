@@ -4,7 +4,7 @@ import MilestoneCard from './MilestoneCard'
 
 const FILTERS = ['All', 'In progress', 'Not started', 'Done', 'Critical']
 
-export default function ProjectView({ orgId, items, subtasks, subprojects, onCycleStatus, onToggleSubtask, onCycleSubtask }) {
+export default function ProjectView({ orgId, items, subtasks, subprojects, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask }) {
   const [filter, setFilter] = useState('All')
   const [view, setView] = useState('list')
 
@@ -87,6 +87,8 @@ export default function ProjectView({ orgId, items, subtasks, subprojects, onCyc
                       onCycleStatus={onCycleStatus}
                       onToggleSubtask={onToggleSubtask}
                       onCycleSubtask={onCycleSubtask}
+                      onUpdateSubtask={onUpdateSubtask}
+                      onDeleteSubtask={onDeleteSubtask}
                     />
                   ))}
                 </div>

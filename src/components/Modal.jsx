@@ -5,7 +5,7 @@ const MODES = ['item', 'subtask', 'event']
 const MODE_LABELS = { item: 'New item', subtask: 'Add sub-task', event: 'Add event' }
 const SUBMIT_LABELS = { item: 'Create item', subtask: 'Add sub-task', event: 'Save event' }
 
-export default function Modal({ show, onClose, currentOrg, subprojects, items, onCreateItem, onCreateSubtask, onCreateEvent, showToast }) {
+export default function Modal({ show, onClose, currentOrg, subprojects, items, subtasks, onCreateItem, onCreateSubtask, onUpdateSubtask, onDeleteSubtask, onCreateEvent, showToast }) {
   const [mode, setMode] = useState('item')
   const [subtaskRows, setSubtaskRows] = useState([])
 
@@ -176,7 +176,33 @@ export default function Modal({ show, onClose, currentOrg, subprojects, items, o
                   : <option value="">— no items —</option>}
               </select>
             </div>
-            <div className="field"><label>Sub-task title *</label><input value={stTitle} onChange={e => setStTitle(e.target.value)} placeholder="What needs to happen?" /></div>
+
+            {/* Existing subtasks for selected parent */}
+            {stParent && (() => {
+              const existing = (subtasks || []).filter(s => s.item_id === stParent)
+              const parent = items.find(i => i.id === stParent)
+              if (!existing.length) return null
+              return (
+                <div className="field">
+                  <label>Existing sub-tasks</label>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: 6 }}>
+                    {existing.map(s => (
+                      <ExistingSubtaskRow
+                        key={s.id}
+                        subtask={s}
+                        parentDue={parent?.due}
+                        onUpdate={onUpdateSubtask}
+                        onDelete={onDeleteSubtask}
+                        showToast={showToast}
+                      />
+                    ))}
+                  </div>
+                </div>
+              )
+            })()}
+
+            <div style={{ height: 1, background: 'var(--border)', margin: '4px 0' }} />
+            <div className="field"><label>New sub-task title</label><input value={stTitle} onChange={e => setStTitle(e.target.value)} placeholder="What needs to happen?" /></div>
             <div className="field-row">
               <div className="field">
                 <label>Status</label>
@@ -224,6 +250,49 @@ export default function Modal({ show, onClose, currentOrg, subprojects, items, o
           <button className="btn-primary" onClick={handleSubmit}>{SUBMIT_LABELS[mode]}</button>
         </div>
       </div>
+    </div>
+  )
+}
+
+function ExistingSubtaskRow({ subtask: s, parentDue, onUpdate, onDelete, showToast }) {
+  const [titleVal, setTitleVal] = useState(s.title)
+  const [dateVal, setDateVal] = useState(s.due || '')
+  const [dirty, setDirty] = useState(false)
+
+  async function save() {
+    if (!dirty) return
+    try {
+      await onUpdate(s, { title: titleVal.trim() || s.title, due: dateVal || null })
+      setDirty(false)
+      showToast('Sub-task updated')
+    } catch (e) { showToast('Error: ' + e.message) }
+  }
+
+  return (
+    <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px 28px', gap: 6, alignItems: 'center' }}>
+      <input
+        value={titleVal}
+        onChange={e => { setTitleVal(e.target.value); setDirty(true) }}
+        onBlur={save}
+        onKeyDown={e => e.key === 'Enter' && save()}
+        style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '6px 9px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none', width: '100%' }}
+      />
+      <input
+        type="date"
+        value={dateVal}
+        onChange={e => { setDateVal(e.target.value); setDirty(true) }}
+        onBlur={save}
+        style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '6px 9px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none', width: '100%' }}
+      />
+      <button
+        onClick={async () => {
+          if (window.confirm(`Delete "${s.title}"?`)) {
+            try { await onDelete(s); showToast('Sub-task deleted') }
+            catch (e) { showToast('Error: ' + e.message) }
+          }
+        }}
+        style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0 }}
+      >×</button>
     </div>
   )
 }

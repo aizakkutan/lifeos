@@ -1,7 +1,7 @@
-import React from 'react'
-import { AVATARS, STATUS_LABEL, PRIORITY_LABEL, STATUS_CLASS, PRIORITY_CLASS, STATUS_CYCLE, fmtDate, isOverdue, exportIcal } from '../lib/constants'
+import React, { useState, useRef } from 'react'
+import { AVATARS, STATUS_LABEL, PRIORITY_LABEL, STATUS_CLASS, PRIORITY_CLASS, fmtDate, isOverdue, exportIcal } from '../lib/constants'
 
-export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleSubtask, onCycleSubtask }) {
+export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask }) {
   const av = AVATARS[item.avatar % 4]
   const overdue = isOverdue(item.due) && item.status !== 'done'
 
@@ -55,28 +55,117 @@ export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleS
           </div>
           <div className="mc-st-list">
             {subtasks.map(s => (
-              <div className="st-row" key={s.id}>
-                <input
-                  type="checkbox"
-                  className="st-check"
-                  checked={s.status === 'done'}
-                  onChange={e => { e.stopPropagation(); onToggleSubtask(s, e.target.checked) }}
-                  onClick={e => e.stopPropagation()}
-                />
-                <span className={`st-title ${s.status === 'done' ? 'done' : ''}`}>{s.title}</span>
-                <button
-                  className={`status-badge ${STATUS_CLASS[s.status]}`}
-                  style={{ fontSize: 9, padding: '1px 7px' }}
-                  onClick={e => { e.stopPropagation(); onCycleSubtask(s) }}
-                >
-                  {STATUS_LABEL[s.status]}
-                </button>
-                <span className="st-date">{fmtDate(s.due || item.due)}</span>
-              </div>
+              <SubtaskRow
+                key={s.id}
+                subtask={s}
+                parentDue={item.due}
+                onToggle={onToggleSubtask}
+                onCycle={onCycleSubtask}
+                onUpdate={onUpdateSubtask}
+                onDelete={onDeleteSubtask}
+              />
             ))}
           </div>
         </div>
       )}
+    </div>
+  )
+}
+
+function SubtaskRow({ subtask: s, parentDue, onToggle, onCycle, onUpdate, onDelete }) {
+  const [editingTitle, setEditingTitle] = useState(false)
+  const [editingDate, setEditingDate] = useState(false)
+  const [titleVal, setTitleVal] = useState(s.title)
+  const titleRef = useRef(null)
+
+  function saveTitle() {
+    const trimmed = titleVal.trim()
+    if (trimmed && trimmed !== s.title) {
+      onUpdate(s, { title: trimmed })
+    } else {
+      setTitleVal(s.title)
+    }
+    setEditingTitle(false)
+  }
+
+  function saveDate(val) {
+    onUpdate(s, { due: val || null })
+    setEditingDate(false)
+  }
+
+  return (
+    <div className="st-row" onClick={e => e.stopPropagation()}>
+      <input
+        type="checkbox"
+        className="st-check"
+        checked={s.status === 'done'}
+        onChange={e => onToggle(s, e.target.checked)}
+        onClick={e => e.stopPropagation()}
+      />
+
+      {/* Inline title edit */}
+      {editingTitle ? (
+        <input
+          ref={titleRef}
+          autoFocus
+          value={titleVal}
+          onChange={e => setTitleVal(e.target.value)}
+          onBlur={saveTitle}
+          onKeyDown={e => { if (e.key === 'Enter') saveTitle(); if (e.key === 'Escape') { setTitleVal(s.title); setEditingTitle(false) } }}
+          onClick={e => e.stopPropagation()}
+          style={{ flex: 1, fontSize: 12, border: '1px solid var(--accent)', borderRadius: 6, padding: '2px 6px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none' }}
+        />
+      ) : (
+        <span
+          className={`st-title ${s.status === 'done' ? 'done' : ''}`}
+          onClick={e => { e.stopPropagation(); setEditingTitle(true) }}
+          title="Click to edit"
+          style={{ cursor: 'text' }}
+        >
+          {s.title}
+        </span>
+      )}
+
+      <button
+        className={`status-badge ${STATUS_CLASS[s.status]}`}
+        style={{ fontSize: 9, padding: '1px 7px' }}
+        onClick={e => { e.stopPropagation(); onCycle(s) }}
+      >
+        {STATUS_LABEL[s.status]}
+      </button>
+
+      {/* Inline date edit */}
+      {editingDate ? (
+        <input
+          type="date"
+          autoFocus
+          defaultValue={s.due || parentDue || ''}
+          onBlur={e => saveDate(e.target.value)}
+          onChange={e => saveDate(e.target.value)}
+          onClick={e => e.stopPropagation()}
+          style={{ fontSize: 10, border: '1px solid var(--accent)', borderRadius: 6, padding: '1px 5px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none', width: 110 }}
+        />
+      ) : (
+        <span
+          className="st-date"
+          onClick={e => { e.stopPropagation(); setEditingDate(true) }}
+          title="Click to edit date"
+          style={{ cursor: 'pointer', textDecoration: 'underline dotted' }}
+        >
+          {fmtDate(s.due || parentDue)}
+        </span>
+      )}
+
+      {/* Delete */}
+      <button
+        onClick={e => { e.stopPropagation(); if (window.confirm(`Delete "${s.title}"?`)) onDelete(s) }}
+        title="Delete sub-task"
+        style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 14, lineHeight: 1, padding: '0 2px', borderRadius: 4, flexShrink: 0 }}
+        onMouseEnter={e => e.target.style.color = '#c0392b'}
+        onMouseLeave={e => e.target.style.color = 'var(--text-hint)'}
+      >
+        ×
+      </button>
     </div>
   )
 }

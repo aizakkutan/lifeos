@@ -2,7 +2,7 @@ import React, { useState } from 'react'
 import { ORGS, STATUS_LABEL, STATUS_CLASS, PRIORITY_CLASS, PRIORITY_LABEL, fmtDate, isOverdue, daysUntil } from '../lib/constants'
 import MilestoneCard from './MilestoneCard'
 
-export default function Dashboard({ items, subtasks, subprojects, config, onNavOrg, onNavSettings, onCycleStatus, onToggleSubtask, onCycleSubtask }) {
+export default function Dashboard({ items, subtasks, subprojects, config, onNavOrg, onNavSettings, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask }) {
   const [beView, setBeView] = useState('cards')
 
   const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
