@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 
-export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, onNavOrg, onNavSettings, collapsed, onCollapse, onExpand, mobileOpen, onMobileClose, onReorderOrgs }) {
+export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, onNavOrg, onNavSettings, collapsed, onCollapse, onExpand, mobileOpen, onMobileOpen, onMobileClose, onReorderOrgs }) {
   const [dragIdx, setDragIdx] = useState(null)
   const [overIdx, setOverIdx] = useState(null)
   const dragItem = useRef(null)
@@ -35,7 +35,7 @@ export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, o
   return (
     <>
       <div className={`sb-backdrop ${mobileOpen ? 'show' : ''}`} onClick={onMobileClose} />
-      <button className="hamburger" onClick={() => mobileOpen ? onMobileClose() : document.getElementById('sidebar').classList.add('mobile-open')}>☰</button>
+      <button className="hamburger" onClick={() => mobileOpen ? onMobileClose() : onMobileOpen()}>☰</button>
       <button className={`sb-expand-btn ${collapsed ? 'show' : ''}`} onClick={onExpand}>›</button>
 
       <nav className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`} id="sidebar">

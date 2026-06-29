@@ -139,6 +139,7 @@ export default function App() {
         onCollapse={() => setSidebarCollapsed(true)}
         onExpand={() => setSidebarCollapsed(false)}
         mobileOpen={sidebarMobileOpen}
+        onMobileOpen={() => setSidebarMobileOpen(true)}
         onMobileClose={() => setSidebarMobileOpen(false)}
         onReorderOrgs={data.reorderOrgs}
       />
