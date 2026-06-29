@@ -1,8 +1,8 @@
 import React, { useState } from 'react'
-import { ORGS, STATUS_LABEL, STATUS_CLASS, PRIORITY_CLASS, PRIORITY_LABEL, fmtDate, isOverdue, daysUntil } from '../lib/constants'
+import { STATUS_LABEL, STATUS_CLASS, PRIORITY_CLASS, PRIORITY_LABEL, fmtDate, isOverdue, daysUntil } from '../lib/constants'
 import MilestoneCard from './MilestoneCard'
 
-export default function Dashboard({ items, subtasks, subprojects, config, onNavOrg, onNavSettings, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask }) {
+export default function Dashboard({ items, subtasks, subprojects, orgs, config, onNavOrg, onNavSettings, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask, onEditItem }) {
   const [beView, setBeView] = useState('cards')
 
   const today = new Date().toLocaleDateString('en-GB', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
@@ -83,7 +83,7 @@ export default function Dashboard({ items, subtasks, subprojects, config, onNavO
       {/* Birds-eye */}
       <div className="dash-section">
         <div className="dash-section-header">
-          <div className="dash-section-title">All projects</div>
+          <div className="dash-section-title">All organizations</div>
           <div className="view-toggle">
             <button className={`view-btn ${beView === 'cards' ? 'active' : ''}`} onClick={() => setBeView('cards')}>Cards</button>
             <button className={`view-btn ${beView === 'timeline' ? 'active' : ''}`} onClick={() => setBeView('timeline')}>Timeline</button>
@@ -92,21 +92,22 @@ export default function Dashboard({ items, subtasks, subprojects, config, onNavO
 
         {beView === 'cards' && (
           <div className="birdseye-grid">
-            {Object.entries(ORGS).map(([orgId, o]) => {
-              const orgItems = items.filter(i => i.org_id === orgId)
-              const orgSubs = subprojects.filter(s => s.org_id === orgId)
+            {orgs.map(org => {
+              const orgItems = items.filter(i => i.org_id === org.id)
+              const orgSubs = subprojects.filter(s => s.org_id === org.id)
               const donePct = orgItems.length ? Math.round(orgItems.filter(i => i.status === 'done').length / orgItems.length * 100) : 0
+              const tagClass = org.tag === 'Ministry' ? 'tag-ministry' : org.tag === 'Business' ? 'tag-business' : 'tag-mission'
               return (
-                <div className="be-card" key={orgId} onClick={() => onNavOrg(orgId)}>
+                <div className="be-card" key={org.id} onClick={() => onNavOrg(org.id)}>
                   <div className="be-card-header">
-                    <div className="be-card-name">{o.name}</div>
-                    <span className={`tag ${o.tagClass}`}>{o.tag}</span>
+                    <div className="be-card-name">{org.name}</div>
+                    <span className={`tag ${tagClass}`}>{org.tag}</span>
                   </div>
                   <div className="be-subs">
                     {orgSubs.map(s => (
                       <div className="be-sub" key={s.id}>
                         <span className="be-sub-name">{s.name}</span>
-                        <span className="be-sub-count">{items.filter(i => i.subproject_id === s.id).length} items</span>
+                        <span className="be-sub-count">{items.filter(i => i.subproject_id === s.id).length} milestones</span>
                       </div>
                     ))}
                   </div>

@@ -1,21 +1,45 @@
-import React from 'react'
-import { ORGS } from '../lib/constants'
+import React, { useState, useRef } from 'react'
 
-export default function Sidebar({ activePage, activeOrg, onNavDashboard, onNavOrg, onNavSettings, collapsed, onCollapse, onExpand, mobileOpen, onMobileClose }) {
+export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, onNavOrg, onNavSettings, collapsed, onCollapse, onExpand, mobileOpen, onMobileClose, onReorderOrgs }) {
+  const [dragIdx, setDragIdx] = useState(null)
+  const [overIdx, setOverIdx] = useState(null)
+  const dragItem = useRef(null)
+
+  function onDragStart(e, idx) {
+    dragItem.current = idx
+    setDragIdx(idx)
+    e.dataTransfer.effectAllowed = 'move'
+  }
+
+  function onDragOver(e, idx) {
+    e.preventDefault()
+    setOverIdx(idx)
+  }
+
+  function onDrop(e, idx) {
+    e.preventDefault()
+    if (dragItem.current === null || dragItem.current === idx) {
+      setDragIdx(null); setOverIdx(null); return
+    }
+    const newOrder = [...orgs]
+    const [moved] = newOrder.splice(dragItem.current, 1)
+    newOrder.splice(idx, 0, moved)
+    onReorderOrgs(newOrder.map(o => o.id))
+    setDragIdx(null); setOverIdx(null); dragItem.current = null
+  }
+
+  function onDragEnd() {
+    setDragIdx(null); setOverIdx(null); dragItem.current = null
+  }
+
   return (
     <>
       <div className={`sb-backdrop ${mobileOpen ? 'show' : ''}`} onClick={onMobileClose} />
-      <button className="hamburger" onClick={() => !mobileOpen && document.getElementById('sidebar').classList.add('mobile-open')}>☰</button>
+      <button className="hamburger" onClick={onMobileClose}>☰</button>
       <button className={`sb-expand-btn ${collapsed ? 'show' : ''}`} onClick={onExpand}>›</button>
 
       <nav className={`sidebar ${collapsed ? 'collapsed' : ''} ${mobileOpen ? 'mobile-open' : ''}`} id="sidebar">
-        <button
-          className="sb-collapse-btn"
-          onClick={() => {
-            if (window.innerWidth <= 768) onMobileClose()
-            else onCollapse()
-          }}
-        >‹</button>
+        <button className="sb-collapse-btn" onClick={() => { if (window.innerWidth <= 768) onMobileClose(); else onCollapse(); }}>‹</button>
 
         <div className="sb-header">
           <div className="sb-title">LifeOS</div>
@@ -23,6 +47,7 @@ export default function Sidebar({ activePage, activeOrg, onNavDashboard, onNavOr
         </div>
 
         <div className="sb-scroll">
+          {/* Dashboard */}
           <button
             className={`sb-item dashboard-item ${activePage === 'dashboard' ? 'active' : ''}`}
             onClick={onNavDashboard}
@@ -37,17 +62,32 @@ export default function Sidebar({ activePage, activeOrg, onNavDashboard, onNavOr
           </button>
 
           <div className="sb-divider" />
-          <div className="sb-section-label">Projects</div>
+          <div className="sb-section-label">Organizations</div>
 
-          {Object.entries(ORGS).map(([id, o]) => (
-            <button
-              key={id}
-              className={`sb-item ${activePage === 'project' && activeOrg === id ? 'active' : ''}`}
-              onClick={() => onNavOrg(id)}
+          {orgs.map((org, idx) => (
+            <div
+              key={org.id}
+              draggable
+              onDragStart={e => onDragStart(e, idx)}
+              onDragOver={e => onDragOver(e, idx)}
+              onDrop={e => onDrop(e, idx)}
+              onDragEnd={onDragEnd}
+              style={{
+                opacity: dragIdx === idx ? 0.4 : 1,
+                borderTop: overIdx === idx && dragIdx !== idx ? '2px solid var(--accent)' : '2px solid transparent',
+                transition: 'border-color .1s',
+              }}
             >
-              <span className="sb-dot" style={{ background: o.color }} />
-              {o.name}
-            </button>
+              <button
+                className={`sb-item ${activePage === 'project' && activeOrg === org.id ? 'active' : ''}`}
+                onClick={() => onNavOrg(org.id)}
+                style={{ width: '100%' }}
+              >
+                <span className="sb-drag-handle" title="Drag to reorder" style={{ cursor: 'grab', color: 'var(--text-hint)', fontSize: 12, marginRight: 2 }}>⠿</span>
+                <span className="sb-dot" style={{ background: org.color }} />
+                {org.name}
+              </button>
+            </div>
           ))}
 
           <div className="sb-divider" />

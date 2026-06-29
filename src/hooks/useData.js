@@ -14,7 +14,7 @@ export function useData() {
     setLoading(true)
     try {
       const [o, sp, it, st, cfg] = await Promise.all([
-        supabase.from('orgs').select('*').order('id'),
+        supabase.from('orgs').select('*').order('sort_order', { ascending: true, nullsFirst: false }).order('id'),
         supabase.from('subprojects').select('*').order('sort_order'),
         supabase.from('items').select('*').order('created_at', { ascending: false }),
         supabase.from('subtasks').select('*').order('sort_order'),
@@ -34,6 +34,17 @@ export function useData() {
   }, [])
 
   useEffect(() => { load() }, [load])
+
+  // Orgs reorder
+  async function reorderOrgs(newOrder) {
+    // newOrder is array of org ids in new order
+    setOrgs(prev => newOrder.map(id => prev.find(o => o.id === id)).filter(Boolean))
+    try {
+      await Promise.all(newOrder.map((id, idx) =>
+        supabase.from('orgs').update({ sort_order: idx }).eq('id', id)
+      ))
+    } catch (e) { console.error('reorderOrgs error', e) }
+  }
 
   // Items
   async function createItem(data) {
@@ -85,36 +96,23 @@ export function useData() {
     setConfig(d)
   }
 
-  // Events (insert only — no local state needed, just fire and forget for now)
+  // Events
   async function createEvent(data) {
     const { error: e } = await supabase.from('events').insert([data])
     if (e) throw e
   }
 
   // Helpers
-  function getSubprojectsForOrg(orgId) {
-    return subprojects.filter(s => s.org_id === orgId)
-  }
-
-  function getItemsForOrg(orgId) {
-    return items.filter(i => i.org_id === orgId)
-  }
-
-  function getItemsForSubproject(subprojectId) {
-    return items.filter(i => i.subproject_id === subprojectId)
-  }
-
-  function getSubtasksForItem(itemId) {
-    return subtasks.filter(s => s.item_id === itemId)
-  }
-
-  function getSubprojectById(id) {
-    return subprojects.find(s => s.id === id)
-  }
+  function getSubprojectsForOrg(orgId) { return subprojects.filter(s => s.org_id === orgId) }
+  function getItemsForOrg(orgId) { return items.filter(i => i.org_id === orgId) }
+  function getItemsForSubproject(subprojectId) { return items.filter(i => i.subproject_id === subprojectId) }
+  function getSubtasksForItem(itemId) { return subtasks.filter(s => s.item_id === itemId) }
+  function getSubprojectById(id) { return subprojects.find(s => s.id === id) }
 
   return {
     orgs, subprojects, items, subtasks, config,
     loading, error, reload: load,
+    reorderOrgs,
     createItem, updateItem, deleteItem,
     createSubtask, updateSubtask, deleteSubtask,
     updateConfig, createEvent,

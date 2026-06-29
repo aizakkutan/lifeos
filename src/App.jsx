@@ -129,6 +129,7 @@ export default function App() {
   return (
     <div className="app">
       <Sidebar
+        orgs={data.orgs}
         activePage={page}
         activeOrg={activeOrg}
         onNavDashboard={navDashboard}
@@ -139,6 +140,7 @@ export default function App() {
         onExpand={() => setSidebarCollapsed(false)}
         mobileOpen={sidebarMobileOpen}
         onMobileClose={() => setSidebarMobileOpen(false)}
+        onReorderOrgs={data.reorderOrgs}
       />
 
       <main className="main">
@@ -171,6 +173,7 @@ export default function App() {
               items={data.items}
               subtasks={data.subtasks}
               subprojects={data.subprojects}
+              orgs={data.orgs}
               config={data.config}
               onNavOrg={navOrg}
               onNavSettings={navSettings}
@@ -188,6 +191,7 @@ export default function App() {
               items={data.items}
               subtasks={data.subtasks}
               subprojects={data.subprojects}
+              orgs={data.orgs}
               onCycleStatus={handleCycleStatus}
               onToggleSubtask={handleToggleSubtask}
               onCycleSubtask={handleCycleSubtask}
@@ -215,6 +219,7 @@ export default function App() {
         show={modalOpen}
         onClose={() => setModalOpen(false)}
         currentOrg={activeOrg}
+        orgs={data.orgs}
         subprojects={data.subprojects}
         items={data.items}
         subtasks={data.subtasks}

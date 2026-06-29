@@ -40,13 +40,13 @@ export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleS
       {subtasks.length > 0 && (
         <div className="mc-subtasks">
           <div className="mc-st-label">
-            Sub-tasks · {subtasks.filter(s => s.status === 'done').length}/{subtasks.length} done
+            Tasks · {subtasks.filter(s => s.status === 'done').length}/{subtasks.length} done
           </div>
           <div className="mc-st-list">
             {subtasks.map(s => (
-              <SubtaskRow
+              <TaskRow
                 key={s.id}
-                subtask={s}
+                task={s}
                 parentDue={item.due}
                 onToggle={onToggleSubtask}
                 onCycle={onCycleSubtask}
@@ -61,13 +61,15 @@ export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleS
   )
 }
 
-function SubtaskRow({ subtask: s, parentDue, onToggle, onCycle, onUpdate, onDelete }) {
+function TaskRow({ task: s, parentDue, onToggle, onCycle, onUpdate, onDelete }) {
   const [editingTitle, setEditingTitle] = useState(false)
   const [titleVal, setTitleVal] = useState(s.title)
+  const [showNotes, setShowNotes] = useState(false)
+  const [notesVal, setNotesVal] = useState(s.notes || '')
   const [icalModal, setIcalModal] = useState(false)
 
-  // Keep titleVal in sync if subtask updates externally
   React.useEffect(() => { setTitleVal(s.title) }, [s.title])
+  React.useEffect(() => { setNotesVal(s.notes || '') }, [s.notes])
 
   function saveTitle() {
     const trimmed = titleVal.trim()
@@ -76,8 +78,8 @@ function SubtaskRow({ subtask: s, parentDue, onToggle, onCycle, onUpdate, onDele
     setEditingTitle(false)
   }
 
-  function saveDate(val) {
-    onUpdate(s, { due: val || null })
+  function saveNotes() {
+    if (notesVal !== (s.notes || '')) onUpdate(s, { notes: notesVal || null })
   }
 
   return (
@@ -91,7 +93,6 @@ function SubtaskRow({ subtask: s, parentDue, onToggle, onCycle, onUpdate, onDele
           onClick={e => e.stopPropagation()}
         />
 
-        {/* Inline title */}
         {editingTitle ? (
           <input
             autoFocus
@@ -124,52 +125,79 @@ function SubtaskRow({ subtask: s, parentDue, onToggle, onCycle, onUpdate, onDele
           {STATUS_LABEL[s.status]}
         </button>
 
-        {/* Inline date — native date input always visible */}
         <input
           type="date"
           value={s.due || parentDue || ''}
-          onChange={e => { e.stopPropagation(); saveDate(e.target.value) }}
+          onChange={e => { e.stopPropagation(); onUpdate(s, { due: e.target.value || null }) }}
           onClick={e => e.stopPropagation()}
           title="Edit due date"
-          style={{
-            fontSize: 10, border: '1px solid var(--border-md)', borderRadius: 6,
-            padding: '2px 5px', background: 'var(--bg)', color: 'var(--text)',
-            fontFamily: 'DM Sans,sans-serif', outline: 'none', width: 115, cursor: 'pointer',
-            flexShrink: 0
-          }}
+          style={{ fontSize: 10, border: '1px solid var(--border-md)', borderRadius: 6, padding: '2px 5px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none', width: 115, cursor: 'pointer', flexShrink: 0 }}
           onFocus={e => e.target.style.borderColor = 'var(--accent)'}
           onBlur={e => e.target.style.borderColor = 'var(--border-md)'}
         />
 
-        {/* iCal button */}
+        {/* Notes toggle — only show icon if has notes or on hover */}
+        <button
+          onClick={e => { e.stopPropagation(); setShowNotes(v => !v) }}
+          title={s.notes ? 'View notes' : 'Add notes'}
+          style={{
+            background: 'none', border: 'none', cursor: 'pointer', fontSize: 12, lineHeight: 1,
+            padding: '0 2px', flexShrink: 0,
+            color: s.notes ? 'var(--accent-mid)' : 'var(--text-hint)',
+            opacity: s.notes ? 1 : 0.4,
+          }}
+          onMouseEnter={e => { e.currentTarget.style.opacity = 1; e.currentTarget.style.color = 'var(--accent)' }}
+          onMouseLeave={e => { e.currentTarget.style.opacity = s.notes ? 1 : 0.4; e.currentTarget.style.color = s.notes ? 'var(--accent-mid)' : 'var(--text-hint)' }}
+        >
+          ✎
+        </button>
+
+        {/* iCal */}
         <button
           onClick={e => { e.stopPropagation(); setIcalModal(true) }}
           title="Export to Calendar"
-          style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 13, lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
-          onMouseEnter={e => e.target.style.color = 'var(--accent)'}
-          onMouseLeave={e => e.target.style.color = 'var(--text-hint)'}
+          style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 13, lineHeight: 1, padding: '0 2px', flexShrink: 0, opacity: 0.4 }}
+          onMouseEnter={e => { e.currentTarget.style.color = 'var(--accent)'; e.currentTarget.style.opacity = 1 }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-hint)'; e.currentTarget.style.opacity = 0.4 }}
         >
           📅
         </button>
 
         {/* Delete */}
         <button
-          onClick={e => { e.stopPropagation(); if (window.confirm(`Delete "${s.title}"?`)) onDelete(s) }}
-          title="Delete"
-          style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 2px', flexShrink: 0 }}
-          onMouseEnter={e => e.target.style.color = '#c0392b'}
-          onMouseLeave={e => e.target.style.color = 'var(--text-hint)'}
+          onClick={e => { e.stopPropagation(); if (window.confirm(`Delete task "${s.title}"?`)) onDelete(s) }}
+          title="Delete task"
+          style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 2px', flexShrink: 0, opacity: 0.4 }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#c0392b'; e.currentTarget.style.opacity = 1 }}
+          onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-hint)'; e.currentTarget.style.opacity = 0.4 }}
         >
           ×
         </button>
       </div>
 
+      {/* Notes box — only shown when toggled and either has content or is being edited */}
+      {showNotes && (
+        <div style={{ marginLeft: 24, marginTop: 4, marginBottom: 4 }} onClick={e => e.stopPropagation()}>
+          <textarea
+            value={notesVal}
+            onChange={e => setNotesVal(e.target.value)}
+            onBlur={saveNotes}
+            placeholder="Add notes for this task…"
+            rows={2}
+            style={{
+              width: '100%', fontSize: 12, border: '1px solid var(--border-md)', borderRadius: 8,
+              padding: '7px 10px', background: 'var(--surface2)', color: 'var(--text)',
+              fontFamily: 'DM Sans,sans-serif', outline: 'none', resize: 'vertical',
+              transition: 'border-color .15s',
+            }}
+            onFocus={e => e.target.style.borderColor = 'var(--accent)'}
+            onBlur2={e => e.target.style.borderColor = 'var(--border-md)'}
+          />
+        </div>
+      )}
+
       {icalModal && (
-        <IcalModal
-          subtask={s}
-          parentDue={parentDue}
-          onClose={() => setIcalModal(false)}
-        />
+        <IcalModal subtask={s} parentDue={parentDue} onClose={() => setIcalModal(false)} />
       )}
     </>
   )
@@ -199,7 +227,6 @@ function IcalModal({ subtask, parentDue, onClose }) {
           <div style={{ fontFamily: 'DM Serif Display, serif', fontSize: 20, color: 'var(--text)' }}>Export to Calendar</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 22, color: 'var(--text-muted)', cursor: 'pointer' }}>×</button>
         </div>
-
         <div className="field"><label>Event title</label><input value={title} onChange={e => setTitle(e.target.value)} /></div>
         <div className="field"><label>Date *</label><input type="date" value={date} onChange={e => setDate(e.target.value)} /></div>
         <div className="field-row">
@@ -208,8 +235,7 @@ function IcalModal({ subtask, parentDue, onClose }) {
         </div>
         <div className="field"><label>Location</label><input value={location} onChange={e => setLocation(e.target.value)} placeholder="Optional" /></div>
         <div className="field"><label>Notes</label><textarea value={notes} onChange={e => setNotes(e.target.value)} placeholder="Optional" rows={2} /></div>
-
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, marginTop: 4 }}>
+        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8 }}>
           <button className="btn-secondary" onClick={onClose}>Cancel</button>
           <button className="btn-primary" onClick={handleExport} disabled={!date}>Download .ics</button>
         </div>
