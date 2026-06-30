@@ -20,10 +20,6 @@ export default function Settings({ orgs, subprojects, config, onUpdateConfig, on
   const [addingProjectFor, setAddingProjectFor] = useState(null)
   const [newProjectName, setNewProjectName] = useState('')
 
-  const [sitePassword, setSitePassword] = useState('')
-  const [confirmPassword, setConfirmPassword] = useState('')
-  const [passwordSet, setPasswordSet] = useState(!!config.site_password)
-
   async function saveConfig() {
     await onUpdateConfig({ days_threshold: days, show_critical: showCrit, show_in_progress: showIP, hide_done: hideDone })
     showToast('Dashboard settings saved')
@@ -70,28 +66,6 @@ export default function Settings({ orgs, subprojects, config, onUpdateConfig, on
     if (window.confirm(`Delete "${sub.name}"? This will also delete its milestones.`)) {
       try { await onDeleteSubproject(sub.id); showToast('Project deleted') }
       catch (e) { showToast('Error: ' + e.message) }
-    }
-  }
-
-  async function handleSavePassword() {
-    if (!sitePassword.trim()) { showToast('Enter a password'); return }
-    if (sitePassword !== confirmPassword) { showToast("Passwords don't match"); return }
-    try {
-      await onUpdateConfig({ site_password: sitePassword })
-      showToast('Site password set')
-      setPasswordSet(true)
-      setSitePassword(''); setConfirmPassword('')
-    } catch (e) { showToast('Error: ' + e.message) }
-  }
-
-  async function handleRemovePassword() {
-    if (window.confirm('Remove password protection? The site will be accessible to anyone with the link.')) {
-      try {
-        await onUpdateConfig({ site_password: null })
-        showToast('Password protection removed')
-        setPasswordSet(false)
-        localStorage.removeItem('lifeos_unlocked')
-      } catch (e) { showToast('Error: ' + e.message) }
     }
   }
 
@@ -267,39 +241,6 @@ export default function Settings({ orgs, subprojects, config, onUpdateConfig, on
 
           {tab === 'Integrations' && (
             <>
-              <div className="settings-card">
-                <div className="settings-card-header">
-                  <div>
-                    <div className="settings-card-title">Site password</div>
-                    <div className="settings-card-sub">{passwordSet ? 'Password protection is active' : 'Anyone with the link can access this site'}</div>
-                  </div>
-                  {passwordSet && (
-                    <button
-                      onClick={handleRemovePassword}
-                      style={{ background: 'none', border: '1px solid #FFB3AD', borderRadius: 'var(--radius)', padding: '6px 13px', fontSize: 12, color: '#D70015', cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}
-                    >
-                      Remove
-                    </button>
-                  )}
-                </div>
-                <div className="settings-card-body">
-                  <div className="field">
-                    <label>{passwordSet ? 'New password' : 'Set a password'}</label>
-                    <input type="password" value={sitePassword} onChange={e => setSitePassword(e.target.value)} placeholder="Enter password" />
-                  </div>
-                  <div className="field">
-                    <label>Confirm password</label>
-                    <input type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)} placeholder="Confirm password" onKeyDown={e => e.key === 'Enter' && handleSavePassword()} />
-                  </div>
-                  <button className="btn-primary" style={{ alignSelf: 'flex-start', fontSize: 12, padding: '6px 14px' }} onClick={handleSavePassword}>
-                    {passwordSet ? 'Update password' : 'Set password'}
-                  </button>
-                  <div style={{ padding: 12, background: 'var(--surface2)', borderRadius: 'var(--radius)', fontSize: 12, color: 'var(--text-muted)' }}>
-                    Visitors will need this password to view the site. It's stored in your database, not as a public environment variable.
-                  </div>
-                </div>
-              </div>
-
               <div className="settings-card">
                 <div className="settings-card-header"><div><div className="settings-card-title">Connected services</div></div></div>
                 <div className="settings-card-body">

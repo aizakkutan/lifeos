@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback } from 'react'
 import { supabase } from '../lib/supabase'
 
-export function useData() {
+export function useData(effectiveUserId, currentUserId) {
   const [orgs, setOrgs] = useState([])
   const [subprojects, setSubprojects] = useState([])
   const [items, setItems] = useState([])
@@ -10,14 +10,28 @@ export function useData() {
   const [loading, setLoading] = useState(true)
   const [error, setError] = useState(null)
 
+  // When viewing as someone else (admin feature), we must explicitly filter
+  // by user_id since RLS only allows admins to SEE all rows, not auto-scope them.
+  const isViewingOther = effectiveUserId && effectiveUserId !== currentUserId
+
   const load = useCallback(async () => {
+    if (!effectiveUserId) { setLoading(false); return }
     setLoading(true)
     try {
+      let orgsQ = supabase.from('orgs').select('*').order('sort_order', { ascending: true, nullsFirst: false }).order('id')
+      let spQ = supabase.from('subprojects').select('*').order('sort_order')
+      let itQ = supabase.from('items').select('*').order('created_at', { ascending: false })
+      let stQ = supabase.from('subtasks').select('*').order('sort_order')
+
+      if (isViewingOther) {
+        orgsQ = orgsQ.eq('user_id', effectiveUserId)
+        spQ = spQ.eq('user_id', effectiveUserId)
+        itQ = itQ.eq('user_id', effectiveUserId)
+        stQ = stQ.eq('user_id', effectiveUserId)
+      }
+
       const [o, sp, it, st, cfg] = await Promise.all([
-        supabase.from('orgs').select('*').order('sort_order', { ascending: true, nullsFirst: false }).order('id'),
-        supabase.from('subprojects').select('*').order('sort_order'),
-        supabase.from('items').select('*').order('created_at', { ascending: false }),
-        supabase.from('subtasks').select('*').order('sort_order'),
+        orgsQ, spQ, itQ, stQ,
         supabase.from('config').select('*').eq('id', 1).single(),
       ])
       if (o.error) throw o.error
@@ -31,13 +45,12 @@ export function useData() {
     } finally {
       setLoading(false)
     }
-  }, [])
+  }, [effectiveUserId, isViewingOther])
 
   useEffect(() => { load() }, [load])
 
   // Orgs reorder
   async function reorderOrgs(newOrder) {
-    // newOrder is array of org ids in new order
     setOrgs(prev => newOrder.map(id => prev.find(o => o.id === id)).filter(Boolean))
     try {
       await Promise.all(newOrder.map((id, idx) =>
@@ -48,7 +61,7 @@ export function useData() {
 
   // Orgs CRUD
   async function createOrg(data) {
-    const { data: d, error: e } = await supabase.from('orgs').insert([data]).select().single()
+    const { data: d, error: e } = await supabase.from('orgs').insert([{ ...data, user_id: currentUserId }]).select().single()
     if (e) throw e
     setOrgs(prev => [...prev, d])
     return d
@@ -71,7 +84,7 @@ export function useData() {
 
   // Subprojects CRUD
   async function createSubproject(data) {
-    const { data: d, error: e } = await supabase.from('subprojects').insert([data]).select().single()
+    const { data: d, error: e } = await supabase.from('subprojects').insert([{ ...data, user_id: currentUserId }]).select().single()
     if (e) throw e
     setSubprojects(prev => [...prev, d])
     return d
@@ -92,7 +105,7 @@ export function useData() {
 
   // Items
   async function createItem(data) {
-    const { data: d, error: e } = await supabase.from('items').insert([data]).select().single()
+    const { data: d, error: e } = await supabase.from('items').insert([{ ...data, user_id: currentUserId }]).select().single()
     if (e) throw e
     setItems(prev => [d, ...prev])
     return d
@@ -114,7 +127,7 @@ export function useData() {
 
   // Subtasks
   async function createSubtask(data) {
-    const { data: d, error: e } = await supabase.from('subtasks').insert([data]).select().single()
+    const { data: d, error: e } = await supabase.from('subtasks').insert([{ ...data, user_id: currentUserId }]).select().single()
     if (e) throw e
     setSubtasks(prev => [...prev, d])
     return d
@@ -133,7 +146,7 @@ export function useData() {
     setSubtasks(prev => prev.filter(x => x.id !== id))
   }
 
-  // Config
+  // Config (global, not per-user for now)
   async function updateConfig(data) {
     const { data: d, error: e } = await supabase.from('config').update(data).eq('id', 1).select().single()
     if (e) throw e
@@ -142,7 +155,7 @@ export function useData() {
 
   // Events
   async function createEvent(data) {
-    const { error: e } = await supabase.from('events').insert([data])
+    const { error: e } = await supabase.from('events').insert([{ ...data, user_id: currentUserId }])
     if (e) throw e
   }
 

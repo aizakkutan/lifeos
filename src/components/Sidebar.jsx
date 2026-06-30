@@ -1,6 +1,6 @@
 import React, { useState, useRef } from 'react'
 
-export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, onNavOrg, onNavSettings, collapsed, onCollapse, onExpand, mobileOpen, onMobileOpen, onMobileClose, onReorderOrgs }) {
+export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, onNavOrg, onNavSettings, collapsed, onCollapse, onExpand, mobileOpen, onMobileOpen, onMobileClose, onReorderOrgs, auth, allUsers, onSwitchUser }) {
   const [dragIdx, setDragIdx] = useState(null)
   const [overIdx, setOverIdx] = useState(null)
   const dragItem = useRef(null)
@@ -107,6 +107,27 @@ export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, o
         </div>
 
         <div className="sb-bottom">
+          {auth?.isAdmin && allUsers && allUsers.length > 0 && (
+            <div style={{ padding: '0 1.25rem 8px' }}>
+              <div style={{ fontSize: 9, fontWeight: 500, letterSpacing: '.1em', textTransform: 'uppercase', color: 'var(--text-hint)', marginBottom: 4 }}>
+                Viewing as
+              </div>
+              <select
+                value={auth.viewingAsUserId || auth.user.id}
+                onChange={e => onSwitchUser(e.target.value === auth.user.id ? null : e.target.value)}
+                style={{
+                  width: '100%', fontSize: 12, padding: '5px 8px', borderRadius: 8,
+                  border: '1px solid var(--border-md)', background: 'var(--bg)', color: 'var(--text)',
+                  fontFamily: 'Inter,sans-serif', outline: 'none', cursor: 'pointer',
+                }}
+              >
+                <option value={auth.user.id}>Me ({auth.user.email})</option>
+                {allUsers.filter(u => u.id !== auth.user.id).map(u => (
+                  <option key={u.id} value={u.id}>{u.email}</option>
+                ))}
+              </select>
+            </div>
+          )}
           <button
             className={`sb-item ${activePage === 'settings' ? 'active' : ''}`}
             onClick={onNavSettings}
@@ -117,6 +138,14 @@ export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, o
             </svg>
             Settings
           </button>
+          {auth && (
+            <button className="sb-item" onClick={auth.signOut} style={{ color: 'var(--text-hint)' }}>
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none">
+                <path d="M5.5 1H2.5C1.67 1 1 1.67 1 2.5v9c0 .83.67 1.5 1.5 1.5h3M9.5 10l3-3-3-3M12 7H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+              Sign out
+            </button>
+          )}
         </div>
       </nav>
     </>

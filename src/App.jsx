@@ -1,6 +1,8 @@
 import React, { useState, useCallback } from 'react'
 import { useData } from './hooks/useData'
 import { useToast } from './hooks/useToast'
+import { useAuth } from './contexts/AuthContext'
+import { supabase } from './lib/supabase'
 import { STATUS_CYCLE } from './lib/constants'
 import Sidebar from './components/Sidebar'
 import Dashboard from './components/Dashboard'
@@ -8,9 +10,11 @@ import ProjectView from './components/ProjectView'
 import Settings from './components/Settings'
 import Modal from './components/Modal'
 import EditItemModal from './components/EditItemModal'
+import Login from './components/Login'
 
 export default function App() {
-  const data = useData()
+  const auth = useAuth()
+  const data = useData(auth.effectiveUserId, auth.user?.id)
   const { toast, showToast } = useToast()
 
   const [page, setPage] = useState('dashboard') // 'dashboard' | 'project' | 'settings'
@@ -19,6 +23,31 @@ export default function App() {
   const [editItem, setEditItem] = useState(null)
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false)
   const [sidebarMobileOpen, setSidebarMobileOpen] = useState(false)
+  const [allUsers, setAllUsers] = useState([])
+
+  React.useEffect(() => {
+    if (auth.isAdmin) {
+      supabase.from('profiles').select('id, email').then(({ data: profiles }) => {
+        if (profiles) setAllUsers(profiles)
+      })
+    }
+  }, [auth.isAdmin])
+
+  // ── Auth gate ──
+  if (auth.loading) {
+    return (
+      <div className="loading-screen">
+        <div>
+          <div className="l-title">LifeOS</div>
+          <div className="l-sub">Loading…</div>
+        </div>
+      </div>
+    )
+  }
+
+  if (!auth.user) {
+    return <Login />
+  }
 
   // ── Navigation ──
   function navDashboard() {
@@ -147,6 +176,9 @@ export default function App() {
         onMobileOpen={() => setSidebarMobileOpen(true)}
         onMobileClose={() => setSidebarMobileOpen(false)}
         onReorderOrgs={data.reorderOrgs}
+        auth={auth}
+        allUsers={allUsers}
+        onSwitchUser={auth.setViewingAsUserId}
       />
 
       <main className="main">
