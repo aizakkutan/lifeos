@@ -35,7 +35,7 @@ export default function Dashboard({ items, subtasks, subprojects, orgs, config, 
         <div className="stat-card"><div className="s-label">Total items</div><div className="s-num accent">{total}</div><div className="s-desc">across all orgs</div></div>
         <div className="stat-card"><div className="s-label">In progress</div><div className="s-num">{ip}</div><div className="s-desc">active now</div></div>
         <div className="stat-card"><div className="s-label">Done</div><div className="s-num accent">{done}</div><div className="s-desc">{total ? Math.round(done / total * 100) : 0}% complete</div></div>
-        <div className="stat-card"><div className="s-label">Critical open</div><div className="s-num" style={{ color: crit ? '#7A1A3A' : undefined }}>{crit}</div><div className="s-desc">need attention</div></div>
+        <div className="stat-card"><div className="s-label">Critical open</div><div className="s-num" style={{ color: crit ? '#D70015' : undefined }}>{crit}</div><div className="s-desc">need attention</div></div>
       </div>
 
       {/* Immediate */}

@@ -30,7 +30,7 @@ export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleS
         <div className="mc-meta">
           <div className="mc-meta-item">
             <CalIcon />
-            <span style={{ color: overdue ? '#7A1A3A' : undefined, fontWeight: overdue ? 500 : undefined }}>
+            <span style={{ color: overdue ? '#D70015' : undefined, fontWeight: overdue ? 500 : undefined }}>
               {overdue ? 'Overdue · ' : ''}{fmtDate(item.due)}
             </span>
           </div>
@@ -104,7 +104,7 @@ function TaskRow({ task: s, parentDue, onToggle, onCycle, onUpdate, onDelete }) 
               if (e.key === 'Escape') { setTitleVal(s.title); setEditingTitle(false) }
             }}
             onClick={e => e.stopPropagation()}
-            style={{ flex: 1, fontSize: 12, border: '1px solid var(--accent)', borderRadius: 6, padding: '2px 6px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none' }}
+            style={{ flex: 1, fontSize: 12, border: '1px solid var(--accent)', borderRadius: 6, padding: '2px 6px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter,sans-serif', outline: 'none' }}
           />
         ) : (
           <span
@@ -131,7 +131,7 @@ function TaskRow({ task: s, parentDue, onToggle, onCycle, onUpdate, onDelete }) 
           onChange={e => { e.stopPropagation(); onUpdate(s, { due: e.target.value || null }) }}
           onClick={e => e.stopPropagation()}
           title="Edit due date"
-          style={{ fontSize: 10, border: '1px solid var(--border-md)', borderRadius: 6, padding: '2px 5px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none', width: 115, cursor: 'pointer', flexShrink: 0 }}
+          style={{ fontSize: 10, border: '1px solid var(--border-md)', borderRadius: 6, padding: '2px 5px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter,sans-serif', outline: 'none', width: 115, cursor: 'pointer', flexShrink: 0 }}
           onFocus={e => e.target.style.borderColor = 'var(--accent)'}
           onBlur={e => e.target.style.borderColor = 'var(--border-md)'}
         />
@@ -168,7 +168,7 @@ function TaskRow({ task: s, parentDue, onToggle, onCycle, onUpdate, onDelete }) 
           onClick={e => { e.stopPropagation(); if (window.confirm(`Delete task "${s.title}"?`)) onDelete(s) }}
           title="Delete task"
           style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 16, lineHeight: 1, padding: '0 2px', flexShrink: 0, opacity: 0.4 }}
-          onMouseEnter={e => { e.currentTarget.style.color = '#c0392b'; e.currentTarget.style.opacity = 1 }}
+          onMouseEnter={e => { e.currentTarget.style.color = '#D70015'; e.currentTarget.style.opacity = 1 }}
           onMouseLeave={e => { e.currentTarget.style.color = 'var(--text-hint)'; e.currentTarget.style.opacity = 0.4 }}
         >
           ×
@@ -187,7 +187,7 @@ function TaskRow({ task: s, parentDue, onToggle, onCycle, onUpdate, onDelete }) 
             style={{
               width: '100%', fontSize: 12, border: '1px solid var(--border-md)', borderRadius: 8,
               padding: '7px 10px', background: 'var(--surface2)', color: 'var(--text)',
-              fontFamily: 'DM Sans,sans-serif', outline: 'none', resize: 'vertical',
+              fontFamily: 'Inter,sans-serif', outline: 'none', resize: 'vertical',
               transition: 'border-color .15s',
             }}
             onFocus={e => e.target.style.borderColor = 'var(--accent)'}
@@ -224,7 +224,7 @@ function IcalModal({ subtask, parentDue, onClose }) {
     >
       <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-md)', padding: '1.5rem', width: 420, maxWidth: '95vw', boxShadow: 'var(--shadow-lg)', display: 'flex', flexDirection: 'column', gap: 14 }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-          <div style={{ fontFamily: 'DM Serif Display, serif', fontSize: 20, color: 'var(--text)' }}>Export to Calendar</div>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, letterSpacing: '-0.02em', fontSize: 20, color: 'var(--text)' }}>Export to Calendar</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 22, color: 'var(--text-muted)', cursor: 'pointer' }}>×</button>
         </div>
         <div className="field"><label>Event title</label><input value={title} onChange={e => setTitle(e.target.value)} /></div>

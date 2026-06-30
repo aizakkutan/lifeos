@@ -114,7 +114,7 @@ export default function App() {
     return (
       <div className="loading-screen">
         <div>
-          <div className="l-title" style={{ color: '#7A1A3A' }}>Connection error</div>
+          <div className="l-title" style={{ color: '#D70015' }}>Connection error</div>
           <div className="l-sub" style={{ maxWidth: 320 }}>{data.error}</div>
           <button className="btn-primary" style={{ marginTop: 16 }} onClick={data.reload}>Retry</button>
         </div>

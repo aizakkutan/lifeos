@@ -47,7 +47,7 @@ export default function EditItemModal({ item, subprojects, onSave, onDelete, onC
     >
       <div style={{ background: 'var(--surface)', borderRadius: 'var(--radius-lg)', border: '1px solid var(--border-md)', padding: '1.5rem', width: 480, maxWidth: '95vw', boxShadow: 'var(--shadow-lg)', maxHeight: '90vh', overflowY: 'auto' }}>
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '1.25rem' }}>
-          <div style={{ fontFamily: 'DM Serif Display, serif', fontSize: 20, color: 'var(--text)' }}>Edit item</div>
+          <div style={{ fontFamily: 'Inter, sans-serif', fontWeight: 700, letterSpacing: '-0.02em', fontSize: 20, color: 'var(--text)' }}>Edit item</div>
           <button onClick={onClose} style={{ background: 'none', border: 'none', fontSize: 22, color: 'var(--text-muted)', cursor: 'pointer' }}>×</button>
         </div>
 
@@ -104,7 +104,7 @@ export default function EditItemModal({ item, subprojects, onSave, onDelete, onC
         <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginTop: '1.25rem' }}>
           <button
             onClick={handleDelete}
-            style={{ background: 'none', border: '1px solid #F5AABE', borderRadius: 'var(--radius)', padding: '6px 13px', fontSize: 12, color: '#7A1A3A', cursor: 'pointer', fontFamily: 'DM Sans,sans-serif' }}
+            style={{ background: 'none', border: '1px solid #FFB3AD', borderRadius: 'var(--radius)', padding: '6px 13px', fontSize: 12, color: '#D70015', cursor: 'pointer', fontFamily: 'Inter,sans-serif' }}
           >
             Delete item
           </button>

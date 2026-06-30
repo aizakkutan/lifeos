@@ -190,11 +190,11 @@ export default function Modal({ show, onClose, currentOrg, orgs, subprojects, it
               {taskRows.map(row => (
                 <div key={row.key} style={{ display: 'flex', flexDirection: 'column', gap: 4, marginBottom: 8, padding: '8px 10px', background: 'var(--surface2)', borderRadius: 'var(--radius)', border: '1px solid var(--border)' }}>
                   <div style={{ display: 'grid', gridTemplateColumns: '1fr 115px 24px', gap: 6, alignItems: 'center' }}>
-                    <input value={row.title} onChange={e => updateTaskRow(row.key, 'title', e.target.value)} placeholder="Task title…" style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '5px 8px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none' }} />
-                    <input type="date" value={row.due} onChange={e => updateTaskRow(row.key, 'due', e.target.value)} style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '5px 8px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none' }} />
+                    <input value={row.title} onChange={e => updateTaskRow(row.key, 'title', e.target.value)} placeholder="Task title…" style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '5px 8px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter,sans-serif', outline: 'none' }} />
+                    <input type="date" value={row.due} onChange={e => updateTaskRow(row.key, 'due', e.target.value)} style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '5px 8px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter,sans-serif', outline: 'none' }} />
                     <button className="st-remove" onClick={() => removeTaskRow(row.key)}>×</button>
                   </div>
-                  <input value={row.notes} onChange={e => updateTaskRow(row.key, 'notes', e.target.value)} placeholder="Task notes (optional)…" style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '5px 8px', fontSize: 11, background: 'var(--bg)', color: 'var(--text-muted)', fontFamily: 'DM Sans,sans-serif', outline: 'none', width: '100%' }} />
+                  <input value={row.notes} onChange={e => updateTaskRow(row.key, 'notes', e.target.value)} placeholder="Task notes (optional)…" style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '5px 8px', fontSize: 11, background: 'var(--bg)', color: 'var(--text-muted)', fontFamily: 'Inter,sans-serif', outline: 'none', width: '100%' }} />
                 </div>
               ))}
               <button className="btn-ghost" onClick={addTaskRow} style={{ marginTop: 4 }}>+ Add task</button>
@@ -314,8 +314,8 @@ function ExistingTaskRow({ task: s, parentDue, onUpdate, onDelete }) {
 
   return (
     <div style={{ display: 'grid', gridTemplateColumns: '1fr 120px 28px', gap: 6, alignItems: 'center' }}>
-      <input value={titleVal} onChange={e => { setTitleVal(e.target.value); setDirty(true) }} onBlur={save} onKeyDown={e => e.key === 'Enter' && save()} style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '6px 9px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none', width: '100%' }} />
-      <input type="date" value={dateVal} onChange={e => { setDateVal(e.target.value); setDirty(true) }} onBlur={save} style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '6px 9px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'DM Sans,sans-serif', outline: 'none', width: '100%' }} />
+      <input value={titleVal} onChange={e => { setTitleVal(e.target.value); setDirty(true) }} onBlur={save} onKeyDown={e => e.key === 'Enter' && save()} style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '6px 9px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter,sans-serif', outline: 'none', width: '100%' }} />
+      <input type="date" value={dateVal} onChange={e => { setDateVal(e.target.value); setDirty(true) }} onBlur={save} style={{ border: '1px solid var(--border-md)', borderRadius: 'var(--radius)', padding: '6px 9px', fontSize: 12, background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter,sans-serif', outline: 'none', width: '100%' }} />
       <button onClick={async () => { if (window.confirm(`Delete "${s.title}"?`)) { try { await onDelete(s) } catch(e){} } }} style={{ background: 'none', border: 'none', color: 'var(--text-hint)', cursor: 'pointer', fontSize: 18, lineHeight: 1, padding: 0 }}>×</button>
     </div>
   )

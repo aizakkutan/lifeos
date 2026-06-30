@@ -65,7 +65,7 @@ export default function ProjectView({ orgId, items, subtasks, subprojects, orgs,
                   border: '1px solid var(--border-md)',
                   background: hiddenProjects[sub.id] ? 'transparent' : 'var(--accent)',
                   color: hiddenProjects[sub.id] ? 'var(--text-muted)' : '#fff',
-                  cursor: 'pointer', fontFamily: 'DM Sans,sans-serif',
+                  cursor: 'pointer', fontFamily: 'Inter,sans-serif',
                   transition: 'all .15s', textDecoration: hiddenProjects[sub.id] ? 'line-through' : 'none',
                   opacity: hiddenProjects[sub.id] ? 0.6 : 1,
                 }}
@@ -85,7 +85,7 @@ export default function ProjectView({ orgId, items, subtasks, subprojects, orgs,
         <div className="stat-card"><div className="s-label">Milestones</div><div className="s-num accent">{orgItems.length}</div><div className="s-desc">total</div></div>
         <div className="stat-card"><div className="s-label">In progress</div><div className="s-num">{ip}</div><div className="s-desc">active</div></div>
         <div className="stat-card"><div className="s-label">Done</div><div className="s-num accent">{done}</div><div className="s-desc">{orgItems.length ? Math.round(done / orgItems.length * 100) : 0}% complete</div></div>
-        <div className="stat-card"><div className="s-label">Critical</div><div className="s-num" style={{ color: crit ? '#7A1A3A' : undefined }}>{crit}</div><div className="s-desc">open</div></div>
+        <div className="stat-card"><div className="s-label">Critical</div><div className="s-num" style={{ color: crit ? '#D70015' : undefined }}>{crit}</div><div className="s-desc">open</div></div>
       </div>
 
       {view === 'list' && (
