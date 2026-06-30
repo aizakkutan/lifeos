@@ -1,8 +1,19 @@
 import React, { useState, useRef } from 'react'
 import { STATUS_LABEL, PRIORITY_LABEL, STATUS_CLASS, PRIORITY_CLASS, fmtDate, isOverdue, exportIcal } from '../lib/constants'
 
-export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask, onEditItem }) {
+export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask, onEditItem, onAddSubtask }) {
   const overdue = isOverdue(item.due) && item.status !== 'done'
+  const [adding, setAdding] = useState(false)
+  const [newTitle, setNewTitle] = useState('')
+  const [newDue, setNewDue] = useState('')
+
+  async function handleAdd() {
+    if (!newTitle.trim()) return
+    try {
+      await onAddSubtask(item, { title: newTitle.trim(), due: newDue || item.due || null, status: 'not-started' })
+      setNewTitle(''); setNewDue(''); setAdding(false)
+    } catch (e) { console.error(e) }
+  }
 
   return (
     <div
@@ -57,6 +68,40 @@ export default function MilestoneCard({ item, subtasks, onCycleStatus, onToggleS
           </div>
         </div>
       )}
+
+      {/* Inline add-task */}
+      <div className={subtasks.length > 0 ? '' : 'mc-subtasks'} onClick={e => e.stopPropagation()}>
+        {adding ? (
+          <div style={{ display: 'flex', gap: 6, marginTop: subtasks.length > 0 ? 6 : 0 }}>
+            <input
+              autoFocus
+              value={newTitle}
+              onChange={e => setNewTitle(e.target.value)}
+              onKeyDown={e => { if (e.key === 'Enter') handleAdd(); if (e.key === 'Escape') { setAdding(false); setNewTitle('') } }}
+              placeholder="New task…"
+              style={{ flex: 1, fontSize: 12, border: '1px solid var(--accent)', borderRadius: 6, padding: '5px 8px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter,sans-serif', outline: 'none' }}
+            />
+            <input
+              type="date"
+              value={newDue}
+              onChange={e => setNewDue(e.target.value)}
+              style={{ fontSize: 11, border: '1px solid var(--border-md)', borderRadius: 6, padding: '5px 6px', background: 'var(--bg)', color: 'var(--text)', fontFamily: 'Inter,sans-serif', outline: 'none', width: 110 }}
+            />
+            <button className="btn-primary" style={{ fontSize: 11, padding: '5px 10px' }} onClick={handleAdd}>Add</button>
+            <button className="btn-secondary" style={{ fontSize: 11, padding: '5px 8px' }} onClick={() => { setAdding(false); setNewTitle('') }}>×</button>
+          </div>
+        ) : (
+          <button
+            onClick={() => setAdding(true)}
+            style={{
+              fontSize: 12, color: 'var(--accent)', background: 'none', border: 'none', cursor: 'pointer',
+              padding: '4px 0', marginTop: subtasks.length > 0 ? 6 : 0, display: 'flex', alignItems: 'center', gap: 4,
+            }}
+          >
+            + Add task
+          </button>
+        )}
+      </div>
     </div>
   )
 }

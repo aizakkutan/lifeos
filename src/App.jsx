@@ -78,6 +78,11 @@ export default function App() {
     catch (e) { showToast('Error: ' + e.message) }
   }
 
+  async function handleAddSubtask(item, fields) {
+    try { await data.createSubtask({ item_id: item.id, ...fields }) }
+    catch (e) { showToast('Error: ' + e.message) }
+  }
+
   // ── Edit / Delete item ──
   function handleEditItem(item) { setEditItem(item) }
 
@@ -184,6 +189,7 @@ export default function App() {
               onUpdateSubtask={handleUpdateSubtask}
               onDeleteSubtask={handleDeleteSubtask}
               onEditItem={handleEditItem}
+              onAddSubtask={handleAddSubtask}
             />
           )}
           {page === 'project' && activeOrg && (
@@ -199,6 +205,7 @@ export default function App() {
               onUpdateSubtask={handleUpdateSubtask}
               onDeleteSubtask={handleDeleteSubtask}
               onEditItem={handleEditItem}
+              onAddSubtask={handleAddSubtask}
             />
           )}
           {page === 'settings' && (

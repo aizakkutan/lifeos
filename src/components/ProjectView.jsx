@@ -6,7 +6,7 @@ import { STATUS_LABEL, PRIORITY_LABEL, STATUS_CLASS, PRIORITY_CLASS, STATUS_CYCL
 
 const FILTERS = ['All', 'In progress', 'Not started', 'Done', 'Critical']
 
-export default function ProjectView({ orgId, items, subtasks, subprojects, orgs, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask, onEditItem }) {
+export default function ProjectView({ orgId, items, subtasks, subprojects, orgs, onCycleStatus, onToggleSubtask, onCycleSubtask, onUpdateSubtask, onDeleteSubtask, onEditItem, onAddSubtask }) {
   const [filter, setFilter] = useState('All')
   const [view, setView] = useState('list')
   const [hiddenProjects, setHiddenProjects] = useState({})
@@ -133,6 +133,7 @@ export default function ProjectView({ orgId, items, subtasks, subprojects, orgs,
                         onUpdateSubtask={onUpdateSubtask}
                         onDeleteSubtask={onDeleteSubtask}
                         onEditItem={onEditItem}
+                        onAddSubtask={onAddSubtask}
                       />
                     ))}
                   </div>

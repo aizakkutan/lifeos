@@ -104,10 +104,15 @@ export default function Modal({ show, onClose, currentOrg, orgs, subprojects, it
         })))
         showToast('Milestone created')
       } else if (mode === 'task') {
-        if (!taskTitle.trim() || !taskParent) return
-        const parent = items.find(i => i.id === taskParent)
+        const parentId = taskParent || parentItems[0]?.id
+        if (!taskTitle.trim() || !parentId) {
+          if (!taskTitle.trim()) { showToast('Enter a task title') }
+          else { showToast('Select a parent milestone') }
+          return
+        }
+        const parent = items.find(i => i.id === parentId)
         await onCreateSubtask({
-          item_id: taskParent, title: taskTitle.trim(),
+          item_id: parentId, title: taskTitle.trim(),
           status: taskStatus, due: taskDue || parent?.due || null,
           notes: taskNotes.trim() || null
         })
@@ -213,7 +218,7 @@ export default function Modal({ show, onClose, currentOrg, orgs, subprojects, it
             </div>
             <div className="field">
               <label>Parent milestone *</label>
-              <select value={taskParent} onChange={e => setTaskParent(e.target.value)}>
+              <select value={taskParent || parentItems[0]?.id || ''} onChange={e => setTaskParent(e.target.value)}>
                 {parentItems.length
                   ? parentItems.map(i => {
                       const sp = subprojects.find(s => s.id === i.subproject_id)
