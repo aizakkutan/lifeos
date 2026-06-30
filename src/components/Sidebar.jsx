@@ -47,7 +47,7 @@ export default function Sidebar({ orgs, activePage, activeOrg, onNavDashboard, o
             <div className="sb-sub">Personal OS</div>
           </div>
           <button
-            onClick={() => { if (window.innerWidth <= 768) onMobileClose(); else onCollapse(); }}
+            onClick={() => { onMobileClose(); onCollapse(); }}
             style={{ background: 'none', border: '1px solid var(--border)', borderRadius: 8, color: 'var(--text-muted)', width: 26, height: 26, cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: 14, flexShrink: 0 }}
             title="Close sidebar"
           >
