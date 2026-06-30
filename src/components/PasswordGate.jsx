@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react'
+import { supabase } from '../lib/supabase'
 
 const STORAGE_KEY = 'lifeos_unlocked'
 
@@ -7,18 +8,33 @@ export default function PasswordGate({ children }) {
   const [password, setPassword] = useState('')
   const [error, setError] = useState(false)
   const [checked, setChecked] = useState(false)
-
-  const correctPassword = import.meta.env.VITE_APP_PASSWORD
+  const [sitePassword, setSitePassword] = useState(null)
+  const [loadingPw, setLoadingPw] = useState(true)
 
   useEffect(() => {
-    const stored = localStorage.getItem(STORAGE_KEY)
-    if (stored === 'true') setUnlocked(true)
-    setChecked(true)
+    async function init() {
+      // Check if already unlocked this session/browser
+      const stored = localStorage.getItem(STORAGE_KEY)
+
+      // Fetch the current site password from config
+      try {
+        const { data } = await supabase.from('config').select('site_password').eq('id', 1).single()
+        setSitePassword(data?.site_password || null)
+      } catch (e) {
+        setSitePassword(null)
+      }
+
+      if (stored === 'true') setUnlocked(true)
+      setChecked(true)
+      setLoadingPw(false)
+    }
+    init()
   }, [])
 
   function handleSubmit(e) {
     e.preventDefault()
-    if (password === correctPassword) {
+    // If no password is set in config, gate is effectively disabled
+    if (!sitePassword || password === sitePassword) {
       localStorage.setItem(STORAGE_KEY, 'true')
       setUnlocked(true)
       setError(false)
@@ -28,8 +44,10 @@ export default function PasswordGate({ children }) {
     }
   }
 
-  // Wait for localStorage check before rendering anything (avoids flash)
-  if (!checked) return null
+  if (!checked || loadingPw) return null
+
+  // No password configured — skip the gate entirely
+  if (!sitePassword) return children
 
   if (unlocked) return children
 
