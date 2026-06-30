@@ -31,8 +31,6 @@ body {
   font-size: 14px;
   line-height: 1.5;
   letter-spacing: -0.005em;
-  padding-top: env(safe-area-inset-top);
-  padding-bottom: env(safe-area-inset-bottom);
 }
 
 /* ── App shell ── */
@@ -75,7 +73,7 @@ body {
 @media (max-width: 768px) { .sb-expand-btn { display: none !important; } }
 
 .hamburger {
-  display: none; position: fixed; top: 12px; left: 12px; z-index: 95;
+  display: none; position: fixed; top: calc(12px + env(safe-area-inset-top, 0px)); left: 12px; z-index: 95;
   background: var(--surface); border: 1px solid var(--border-md);
   border-radius: var(--radius); color: var(--text);
   width: 36px; height: 36px; cursor: pointer;
@@ -119,7 +117,12 @@ body {
   border-bottom: 1px solid var(--border);
   flex-shrink: 0; background: var(--surface);
 }
-@media (max-width: 768px) { .topbar { padding: 0 1rem 0 54px; } }
+@media (max-width: 768px) {
+  .topbar {
+    padding: env(safe-area-inset-top, 0) 1rem 0 54px;
+    height: calc(52px + env(safe-area-inset-top, 0px));
+  }
+}
 
 .breadcrumb { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text-muted); }
 .breadcrumb .crumb { color: var(--text); font-weight: 500; font-size: 13px; }
@@ -365,6 +368,7 @@ body {
 @media (max-width: 768px) { .fab { display: flex; } }
 
 /* ── Loading ── */
+@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
 .loading-screen { display: flex; align-items: center; justify-content: center; height: 100vh; background: var(--bg); }
 .loading-screen .l-title { font-family: 'Inter', sans-serif; font-weight: 700; letter-spacing: -0.02em; font-size: 24px; color: var(--accent); }
 .loading-screen .l-sub { font-size: 13px; color: var(--text-muted); margin-top: 6px; text-align: center; }

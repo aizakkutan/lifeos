@@ -163,6 +163,16 @@ export default function App() {
             }
           </div>
           <div className="topbar-right">
+            <button
+              className="btn-secondary"
+              onClick={() => data.reload()}
+              title="Refresh data"
+              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', width: 32, height: 32, padding: 0 }}
+            >
+              <svg width="14" height="14" viewBox="0 0 14 14" fill="none" style={{ animation: data.loading ? 'spin 0.8s linear infinite' : 'none' }}>
+                <path d="M12.5 7a5.5 5.5 0 1 1-1.6-3.9M12.5 1.5v3.5h-3.5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round"/>
+              </svg>
+            </button>
             <button className="btn-primary" onClick={() => setModalOpen(true)}>
               <svg width="11" height="11" viewBox="0 0 11 11" fill="none">
                 <path d="M5.5 1v9M1 5.5h9" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round"/>
