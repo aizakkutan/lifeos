@@ -203,9 +203,16 @@ export default function App() {
           )}
           {page === 'settings' && (
             <Settings
+              orgs={data.orgs}
               subprojects={data.subprojects}
               config={data.config}
               onUpdateConfig={data.updateConfig}
+              onCreateOrg={data.createOrg}
+              onUpdateOrg={data.updateOrg}
+              onDeleteOrg={data.deleteOrg}
+              onCreateSubproject={data.createSubproject}
+              onUpdateSubproject={data.updateSubproject}
+              onDeleteSubproject={data.deleteSubproject}
               showToast={showToast}
             />
           )}

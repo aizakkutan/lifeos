@@ -46,6 +46,50 @@ export function useData() {
     } catch (e) { console.error('reorderOrgs error', e) }
   }
 
+  // Orgs CRUD
+  async function createOrg(data) {
+    const { data: d, error: e } = await supabase.from('orgs').insert([data]).select().single()
+    if (e) throw e
+    setOrgs(prev => [...prev, d])
+    return d
+  }
+
+  async function updateOrg(id, data) {
+    const { data: d, error: e } = await supabase.from('orgs').update(data).eq('id', id).select().single()
+    if (e) throw e
+    setOrgs(prev => prev.map(o => o.id === id ? d : o))
+    return d
+  }
+
+  async function deleteOrg(id) {
+    const { error: e } = await supabase.from('orgs').delete().eq('id', id)
+    if (e) throw e
+    setOrgs(prev => prev.filter(o => o.id !== id))
+    setSubprojects(prev => prev.filter(s => s.org_id !== id))
+    setItems(prev => prev.filter(i => i.org_id !== id))
+  }
+
+  // Subprojects CRUD
+  async function createSubproject(data) {
+    const { data: d, error: e } = await supabase.from('subprojects').insert([data]).select().single()
+    if (e) throw e
+    setSubprojects(prev => [...prev, d])
+    return d
+  }
+
+  async function updateSubproject(id, data) {
+    const { data: d, error: e } = await supabase.from('subprojects').update(data).eq('id', id).select().single()
+    if (e) throw e
+    setSubprojects(prev => prev.map(s => s.id === id ? d : s))
+    return d
+  }
+
+  async function deleteSubproject(id) {
+    const { error: e } = await supabase.from('subprojects').delete().eq('id', id)
+    if (e) throw e
+    setSubprojects(prev => prev.filter(s => s.id !== id))
+  }
+
   // Items
   async function createItem(data) {
     const { data: d, error: e } = await supabase.from('items').insert([data]).select().single()
@@ -113,6 +157,8 @@ export function useData() {
     orgs, subprojects, items, subtasks, config,
     loading, error, reload: load,
     reorderOrgs,
+    createOrg, updateOrg, deleteOrg,
+    createSubproject, updateSubproject, deleteSubproject,
     createItem, updateItem, deleteItem,
     createSubtask, updateSubtask, deleteSubtask,
     updateConfig, createEvent,
