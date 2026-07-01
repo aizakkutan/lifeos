@@ -249,6 +249,9 @@ export default function App() {
               onDeleteSubtask={handleDeleteSubtask}
               onEditItem={handleEditItem}
               onAddSubtask={handleAddSubtask}
+              onCreateSubproject={data.createSubproject}
+              onReorderSubprojects={data.reorderSubprojects}
+              onReorderSubtasks={data.reorderSubtasks}
             />
           )}
           {page === 'settings' && (

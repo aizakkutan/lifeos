@@ -59,6 +59,34 @@ export function useData(effectiveUserId, currentUserId) {
     } catch (e) { console.error('reorderOrgs error', e) }
   }
 
+  // Subprojects reorder
+  async function reorderSubprojects(newOrder) {
+    setSubprojects(prev => {
+      const others = prev.filter(s => !newOrder.includes(s.id))
+      const reordered = newOrder.map(id => prev.find(s => s.id === id)).filter(Boolean)
+      return [...others, ...reordered]
+    })
+    try {
+      await Promise.all(newOrder.map((id, idx) =>
+        supabase.from('subprojects').update({ sort_order: idx }).eq('id', id)
+      ))
+    } catch (e) { console.error('reorderSubprojects error', e) }
+  }
+
+  // Subtasks reorder
+  async function reorderSubtasks(itemId, newOrder) {
+    setSubtasks(prev => {
+      const others = prev.filter(s => !newOrder.includes(s.id))
+      const reordered = newOrder.map(id => prev.find(s => s.id === id)).filter(Boolean)
+      return [...others, ...reordered]
+    })
+    try {
+      await Promise.all(newOrder.map((id, idx) =>
+        supabase.from('subtasks').update({ sort_order: idx }).eq('id', id)
+      ))
+    } catch (e) { console.error('reorderSubtasks error', e) }
+  }
+
   // Orgs CRUD
   async function createOrg(data) {
     const { data: d, error: e } = await supabase.from('orgs').insert([{ ...data, user_id: currentUserId }]).select().single()
@@ -169,7 +197,7 @@ export function useData(effectiveUserId, currentUserId) {
   return {
     orgs, subprojects, items, subtasks, config,
     loading, error, reload: load,
-    reorderOrgs,
+    reorderOrgs, reorderSubprojects, reorderSubtasks,
     createOrg, updateOrg, deleteOrg,
     createSubproject, updateSubproject, deleteSubproject,
     createItem, updateItem, deleteItem,
