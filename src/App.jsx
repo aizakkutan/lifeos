@@ -223,6 +223,7 @@ export default function App() {
               subprojects={data.subprojects}
               orgs={data.orgs}
               config={data.config}
+              profile={auth.profile}
               onNavOrg={navOrg}
               onNavSettings={navSettings}
               onCycleStatus={handleCycleStatus}
@@ -255,7 +256,12 @@ export default function App() {
               orgs={data.orgs}
               subprojects={data.subprojects}
               config={data.config}
+              profile={auth.profile}
               onUpdateConfig={data.updateConfig}
+              onUpdateProfile={async (updates) => {
+                await supabase.from('profiles').update(updates).eq('id', auth.user.id)
+                await auth.loadProfile(auth.user.id)
+              }}
               onCreateOrg={data.createOrg}
               onUpdateOrg={data.updateOrg}
               onDeleteOrg={data.deleteOrg}

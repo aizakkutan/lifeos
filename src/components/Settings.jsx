@@ -4,13 +4,14 @@ const TABS = ['Dashboard', 'Projects', 'Users', 'Integrations']
 const ORG_COLORS = ['#007AFF', '#34C759', '#FF9500', '#AF52DE', '#FF3B30', '#5856D6', '#FF2D55', '#00C7BE']
 const ORG_TAGS = ['Ministry', 'Business', 'Mission', 'Personal']
 
-export default function Settings({ orgs, subprojects, config, onUpdateConfig, onCreateOrg, onUpdateOrg, onDeleteOrg, onCreateSubproject, onUpdateSubproject, onDeleteSubproject, showToast }) {
+export default function Settings({ orgs, subprojects, config, profile, onUpdateConfig, onUpdateProfile, onCreateOrg, onUpdateOrg, onDeleteOrg, onCreateSubproject, onUpdateSubproject, onDeleteSubproject, showToast }) {
   const [tab, setTab] = useState('Dashboard')
   const [aiContext, setAiContext] = useState(config.ai_context || '')
   const [days, setDays] = useState(config.days_threshold || 7)
   const [showCrit, setShowCrit] = useState(config.show_critical ?? true)
   const [showIP, setShowIP] = useState(config.show_in_progress ?? true)
   const [hideDone, setHideDone] = useState(config.hide_done ?? true)
+  const [displayName, setDisplayName] = useState(profile?.name || '')
 
   const [addingOrg, setAddingOrg] = useState(false)
   const [newOrgName, setNewOrgName] = useState('')
@@ -225,15 +226,24 @@ export default function Settings({ orgs, subprojects, config, onUpdateConfig, on
 
           {tab === 'Users' && (
             <div className="settings-card">
-              <div className="settings-card-header"><div><div className="settings-card-title">Users</div><div className="settings-card-sub">Single-user in v1</div></div></div>
+              <div className="settings-card-header">
+                <div><div className="settings-card-title">Your profile</div><div className="settings-card-sub">How you appear in LifeOS</div></div>
+                <button className="btn-primary" style={{ fontSize: 12, padding: '5px 12px' }} onClick={async () => { await onUpdateProfile({ name: displayName }); showToast('Name updated') }}>Save</button>
+              </div>
               <div className="settings-card-body">
                 <div className="field-row">
-                  <div className="field"><label>Name</label><input type="text" defaultValue="Isaac" /></div>
-                  <div className="field"><label>Role</label><input type="text" defaultValue="Owner" disabled style={{ opacity: .5, cursor: 'not-allowed' }} /></div>
+                  <div className="field">
+                    <label>Display name</label>
+                    <input type="text" value={displayName} onChange={e => setDisplayName(e.target.value)} placeholder="Your name" onKeyDown={e => e.key === 'Enter' && onUpdateProfile({ name: displayName }).then(() => showToast('Name updated'))} />
+                  </div>
+                  <div className="field">
+                    <label>Role</label>
+                    <input type="text" value={profile?.is_admin ? 'Admin' : 'Member'} disabled style={{ opacity: .5, cursor: 'not-allowed' }} />
+                  </div>
                 </div>
-                <div className="field"><label>Email</label><input type="email" placeholder="your@email.com" /></div>
-                <div style={{ padding: 12, background: 'var(--surface2)', borderRadius: 'var(--radius)', fontSize: 12, color: 'var(--text-muted)' }}>
-                  Multi-user access planned for a future release.
+                <div className="field">
+                  <label>Email</label>
+                  <input type="email" value={profile?.email || ''} disabled style={{ opacity: .5, cursor: 'not-allowed' }} />
                 </div>
               </div>
             </div>

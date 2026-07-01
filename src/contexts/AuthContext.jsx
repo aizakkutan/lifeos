@@ -56,6 +56,7 @@ export function AuthProvider({ children }) {
     <AuthContext.Provider value={{
       user, profile, loading,
       signUp, signIn, signOut,
+      loadProfile,
       isAdmin: !!profile?.is_admin,
       viewingAsUserId, setViewingAsUserId,
       effectiveUserId,
